@@ -4,11 +4,18 @@ from vocode.streaming.models.events import (
 )
 from vocode.streaming.utils.events_manager import EventsManager
 from loguru import logger
-from prometheus_client import Counter, Gauge
+from prometheus_client import Counter, Gauge, REGISTRY
 
 # Create Prometheus metrics
-SESSION_COUNTER = Counter('voicebot_session_count', 'Number of sessions started')
-SESSION_GAUGE = Gauge('voicebot_active_sessions', 'Current number of active sessions')
+if 'voicebot_session_count' not in REGISTRY._names_to_collectors:
+    SESSION_COUNTER = Counter('voicebot_session_count', 'Number of sessions started')
+else:
+    SESSION_COUNTER = REGISTRY._names_to_collectors['voicebot_session_count']
+
+if 'voicebot_active_sessions' not in REGISTRY._names_to_collectors:
+    SESSION_GAUGE = Gauge('voicebot_active_sessions', 'Current number of active sessions')
+else:
+    SESSION_GAUGE = REGISTRY._names_to_collectors['voicebot_active_sessions']
 
 class VoiceBotEventsManager(EventsManager):
     async def handle_event(self, event: Event):
